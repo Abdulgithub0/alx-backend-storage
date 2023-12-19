@@ -1,2 +1,2 @@
 // update all documents in the collection school whose field 'name' = "Holberton school"
-db.school.updateMany({ name: 'Holberton school' })
+db.school.deleteMany({ name: 'Holberton school' })
