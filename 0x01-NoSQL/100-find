@@ -1,0 +1,2 @@
+// perform regex search on mongodb
+db.school.find({name: {'$regex': '^Holberton'}})
