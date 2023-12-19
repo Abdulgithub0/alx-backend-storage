@@ -1,0 +1,2 @@
+// list all documents store in the collection school with field 'name' = 'Holberton school'
+db.school.find({name: 'Holberton school'})
