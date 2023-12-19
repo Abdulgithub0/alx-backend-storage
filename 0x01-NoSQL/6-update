@@ -1,0 +1,2 @@
+// update all documents in the collection school whose field 'name' = "Holberton school"
+db.school.updateMany({ name: 'Holberton school' }, { $set: {address: '972 Mission street' }})
