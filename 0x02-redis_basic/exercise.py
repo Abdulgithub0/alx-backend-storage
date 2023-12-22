@@ -4,8 +4,20 @@
 import redis
 import uuid
 from typing import Union, Optional, Callable
+from functools import wraps
 
 anytype = Union[str, bytes, int, float]
+
+
+def count_calls(fun: Callable) -> Callable:
+    """create a closure"""
+
+    @wraps(fun)
+    def wrapper(self, *args, **kwargs):
+        """track the number of time store method is call"""
+        self._redis.incr(fun.__qualname__)
+        return fun(self, *args, **kwargs)
+    return wrapper
 
 
 class Cache:
@@ -16,6 +28,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: anytype) -> str:
         '''store data using random generated key'''
         self._key = str(uuid.uuid4())
