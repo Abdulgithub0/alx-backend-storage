@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-
 """implementation of class cache"""
+
 import redis
 import uuid
-from typing import Union, Optional, Callable
+from typing import Union, Optional, Callable, List, Dict
 import functools
 
 anytype = Union[str, bytes, int, float]
@@ -12,7 +12,7 @@ anytype = Union[str, bytes, int, float]
 def count_calls(fun: Callable) -> Callable:
     """create a closure"""
     @functools.wraps(fun)
-    def wrapper(self, *args, **kwargs) -> Callable:
+    def wrapper(self, *args, **kwargs) -> str:
         """track the number of time cache.store method is call"""
         self._redis.incr(fun.__qualname__)
         return fun(self, *args, **kwargs)
@@ -22,13 +22,28 @@ def count_calls(fun: Callable) -> Callable:
 def call_history(func: Callable) -> Callable:
     """create a closure"""
     @functools.wraps(func)
-    def wrapper(self, *args, **kwargs) -> Callable:
+    def wrapper(self, *args, **kwargs) -> str:
         """store func's domain and range for every calls to it"""
         self._redis.rpush(f'{func.__qualname__}:inputs', str(args))
         result: str = str(func(self, *args, **kwargs))
         self._redis.rpush(f'{func.__qualname__}:outputs', str(result))
         return result
     return wrapper
+
+
+def replay(func: Callable) -> None:
+    """display number of calls, inputs, and outputs to func"""
+    if not func:
+        return None
+    key = func.__qualname__
+    r = redis.Redis()
+    count = r.get(key).decode('utf-8')
+    ins = r.lrange(f'{key}:inputs', 0, -1)
+    outs = r.lrange(f'{key}:outputs', 0, -1)
+    loop_len = len(outs)
+    print(f'{key} was called {count} times:')
+    for i in range(loop_len):
+        print(f"{key}(*{ins[i].decode('utf-8')}) -> {outs[i].decode('utf-8')}")
 
 
 class Cache:
