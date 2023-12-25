@@ -52,15 +52,14 @@ class Cache:
         data = self._redis.get(key)
         return fn(data) if fn and data else data
 
-    def get_str(self, k: str) -> str:
+    def get_str(self, data: bytes) -> str:
         '''convert the retrieve binary data to string'''
-        return k.decode('utf-8')
+        return data.decode('utf-8')
 
-    def get_int(self, k: str) -> int:
+    def get_int(self, data: bytes) -> int:
         '''convert the retrieve binary data to int'''
-        # data = self.get(k)
         try:
-            data = int(k.decode('utf-8'))
+            data = int(data.decode('utf-8'))
         except Exception:
             pass
         return data
