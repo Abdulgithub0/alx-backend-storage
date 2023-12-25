@@ -54,13 +54,13 @@ class Cache:
 
     def get_str(self, k: str) -> str:
         '''convert the retrieve binary data to string'''
-        return self.get(k).decode('utf-8')
+        return k.decode('utf-8')
 
     def get_int(self, k: str) -> int:
         '''convert the retrieve binary data to int'''
-        data = self.get(k)
+        # data = self.get(k)
         try:
-            data = int(data.decode('utf-8'))
+            data = int(k.decode('utf-8'))
         except Exception:
             pass
         return data
