@@ -11,9 +11,9 @@ import requests
 import redis
 from typing import Callable
 from functools import wraps
+import time
 
 red = redis.Redis()
-red.flushdb()
 
 
 def tracker(func: Callable) -> Callable:
@@ -35,3 +35,40 @@ def get_page(url: str) -> str:
     resp = requests.get(url)
     resp.raise_for_status()
     return resp.text
+
+
+if __name__ == '__main__':
+    key = 'http://slowwly.robertomurray.co.uk'
+    red.flushdb()
+    get_page(key)
+
+    print(f"Total calls -> {red.get(f'count:{key}').decode('utf-8')}\n")
+    print(f"Resource -> {red.get(f'resource:{key}').decode('utf-8')}\n")
+    print(f"Expire in -> {red.ttl(f'resource:{key}')} secs\n")
+    get_page(key)
+    time.sleep(5)
+
+    print(f"Total calls -> {red.get(f'count:{key}').decode('utf-8')}\n")
+    print(f"Resource -> {red.get(f'resource:{key}').decode('utf-8')}\n")
+    print(f"Expire in -> {red.ttl(f'resource:{key}')} secs\n")
+
+    time.sleep(5)
+
+    print(f"Total calls -> {red.get(f'count:{key}').decode('utf-8')}\n")
+    # print(f"Resource -> {red.get(f'resource:{key}').decode('utf-8')}\n")
+    print(f"Expire in -> {red.ttl(f'resource:{key}')} secs\n")
+
+    data = get_page(key)
+    print(data)
+    print(f"Total calls -> {red.get(f'count:{key}').decode('utf-8')}\n")
+    print(f"Resource -> {red.get(f'resource:{key}').decode('utf-8')}\n")
+    print(f"Expire in -> {red.ttl(f'resource:{key}')} secs\n")
+
+    get_page(key)
+    time.sleep(2)
+
+    print(f"Total calls -> {red.get(f'count:{key}').decode('utf-8')}\n")
+    print(f"Resource -> {red.get(f'resource:{key}').decode('utf-8')}\n")
+    print(f"Expire in -> {red.ttl(f'resource:{key}')} secs\n")
+
+    red.flushdb()
