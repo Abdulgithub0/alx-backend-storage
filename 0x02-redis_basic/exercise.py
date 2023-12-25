@@ -38,12 +38,12 @@ def replay(func: Callable) -> None:
     key = func.__qualname__
     r = redis.Redis()
     count = r.get(key).decode('utf-8')
-    ins = r.lrange(f'{key}:inputs', 0, -1)
-    outs = r.lrange(f'{key}:outputs', 0, -1)
-    loop_len = len(outs)
+    inputs = r.lrange(f'{key}:inputs', 0, -1)
+    outputs = r.lrange(f'{key}:outputs', 0, -1)
+    loop_len = len(outputs)
     print(f'{key} was called {count} times:')
-    for i in range(loop_len):
-        print(f"{key}(*{ins[i].decode('utf-8')}) -> {outs[i].decode('utf-8')}")
+    for ins, outs in zip(inputs, outputs):
+        print(f"{key}(*{ins.decode('utf-8')}) -> {outs.decode('utf-8')}")
 
 
 class Cache:
