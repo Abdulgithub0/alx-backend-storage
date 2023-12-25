@@ -13,7 +13,7 @@ def count_calls(fun: Callable) -> Callable:
     """create a closure"""
     @functools.wraps(fun)
     def wrapper(self, *args, **kwargs) -> Callable:
-        """track the number of time store method is call"""
+        """track the number of time cache.store method is call"""
         self._redis.incr(fun.__qualname__)
         return fun(self, *args, **kwargs)
     return wrapper
@@ -24,8 +24,8 @@ def call_history(func: Callable) -> Callable:
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs) -> Callable:
         """store func's domain and range for every calls to it"""
-        self._redis.rpush(f'{func.__qualname__}:inputs', str(*args))
-        result: anytype = func(self, *args, **kwargs)
+        self._redis.rpush(f'{func.__qualname__}:inputs', str(args))
+        result: str = str(func(self, *args, **kwargs))
         self._redis.rpush(f'{func.__qualname__}:outputs', str(result))
         return result
     return wrapper
@@ -52,10 +52,15 @@ class Cache:
         data = self._redis.get(key)
         return fn(data) if fn and data else data
 
-    def get_str(self) -> str:
-        '''convert the retrive binary data to string'''
-        return self.get(self._key, str)
+    def get_str(self, k: str) -> str:
+        '''convert the retrieve binary data to string'''
+        return self.get(k).decode('utf-8')
 
-    def get_int(self) -> int:
-        '''convert the retrive binary data to int'''
-        return self.get(self._key, int)
+    def get_int(self, k: str) -> int:
+        '''convert the retrieve binary data to int'''
+        data = self.get(k)
+        try:
+            data = int(data.decode('utf-8'))
+        except Exception:
+            pass
+        return data
